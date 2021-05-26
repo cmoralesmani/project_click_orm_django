@@ -1,25 +1,8 @@
-import click
+import os
+import sys
 
-products_list = [
-    {
-        'id': 1,
-        'name': 'TV Smart 14"',
-        'price': 400,
-        'available': True
-    },
-    {
-        'id': 2,
-        'name': 'Abanico',
-        'price': 110,
-        'available': True
-    },
-    {
-        'id': 3,
-        'name': 'Llave Cruz',
-        'price': 35,
-        'available': False
-    },
-]
+import click
+import django
 
 @click.command()
 @click.option('--name', default=str(''), prompt='Nombre del producto',
@@ -29,10 +12,18 @@ def products_filter(name):
     Simple program to filter products by name
     If you do not specify any filter, it returns all products
     """
-    products_filtered = [p for p in products_list if name in p['name']]
+    from service.products.models import Product
+    products_filtered = Product.objects.filter(name__contains = name)
     click.echo("*** Listado de productos ***")
     for product in products_filtered:
-        click.echo(f"Nombre: {product['name']} Precio: {product['price']}")
+        click.echo(f"Nombre: {product.name} Precio: {product.price}")
 
 if __name__ == '__main__':
+    # Turn off bytecode generation
+    sys.dont_write_bytecode = True
+
+    # Django specific settings
+    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'service.settings')
+    django.setup()
+
     products_filter()
